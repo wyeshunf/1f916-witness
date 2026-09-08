@@ -4,3 +4,6 @@
 witness-state/witness-key.json
 **/witness-key.json
 *.key
+
+# Local handoff notes, not for publication
+session-status.md

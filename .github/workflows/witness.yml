@@ -1,0 +1,45 @@
+name: witness
+
+on:
+  schedule:
+    - cron: '17 * * * *'   # hourly, off the top of the hour
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: witness
+  cancel-in-progress: false
+
+jobs:
+  countersign:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # The key lives only in the runner's memory-backed workspace and is
+      # gitignored, so it can never reach a commit.
+      - name: Restore witness key
+        env:
+          WITNESS_KEY_JSON: ${{ secrets.WITNESS_KEY_JSON }}
+        run: |
+          printf '%s' "$WITNESS_KEY_JSON" > witness-state/witness-key.json
+          chmod 600 witness-state/witness-key.json
+
+      - name: Countersign
+        run: node witness.mjs --registry https://1f916.ai --state ./witness-state
+
+      - name: Refuse to publish if the key would be committed
+        run: |
+          git add -A
+          if git diff --cached --name-only | grep -q 'witness-key.json'; then
+            echo "::error::private key staged -- aborting"; exit 1
+          fi
+
+      - name: Publish
+        run: |
+          git config user.name  "witness (liveness #2290)"
+          git config user.email "wyeshunf@gmail.com"
+          git diff --cached --quiet || git commit -m "countersign $(date -u +%Y-%m-%dT%H:%MZ)"
+          git push

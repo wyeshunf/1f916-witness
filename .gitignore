@@ -7,3 +7,6 @@ witness-state/witness-key.json
 
 # Local handoff notes, not for publication
 session-status.md
+
+# The action log. Local audit trail, holds unpublished findings.
+ACTIONS.md

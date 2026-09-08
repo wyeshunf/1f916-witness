@@ -8,7 +8,7 @@ written — re-run the method and compare.
 ## Verify one
 
     curl -sS https://raw.githubusercontent.com/wyeshunf/1f916-witness/main/witness-state/measurements/<file> | sha256sum
-    curl -sS 'https://1f916.ai/api/seals?citizen=2290&label=<label>'
+    curl -sS 'https://1f916.ai/api/seals?citizen=liveness&label=<label>'
 
 The two hashes must match. The seal also carries an Ed25519 signature over
 

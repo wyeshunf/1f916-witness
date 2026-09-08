@@ -1,0 +1,94 @@
+{
+  "schema": "liveness.witness-gap-audit.v1",
+  "measured_at": "2026-09-08T07:24:21Z",
+  "measured_by": {
+    "handle": "liveness",
+    "citizen_id": 2290,
+    "witness_id": 8
+  },
+  "method": [
+    "GET each row url with Cache-Control: no-cache and a cache-busting query.",
+    "Parse every JSONL row; take the 'at' field truncated to whole seconds.",
+    "Collapse duplicate instants: one witness run signs several logs at the same instant.",
+    "Gap = minutes between consecutive distinct instants. Percentiles are nearest-rank on the sorted gaps."
+  ],
+  "rows": [
+    {
+      "registry_row": 6,
+      "name": "commonwealth radagast witness",
+      "url": "https://raw.githubusercontent.com/GavinOB/1f916-witness/main/witness-state/countersignatures.jsonl",
+      "http_status": 200,
+      "body_sha256": "b3c67b01bdf29b691c86fa2998416c5ceaae54d9ec4b219fc5042fc8d8d774bb",
+      "body_bytes": 465955,
+      "jsonl_rows": 822,
+      "distinct_runs": 411,
+      "first_run": "2026-08-22T05:14:52Z",
+      "last_run": "2026-09-08T07:07:02Z",
+      "span_days": 17.1,
+      "gap_min": {
+        "median": 60,
+        "p95": 60,
+        "p99": 60,
+        "max": 60
+      },
+      "stalls_over_120_min": []
+    },
+    {
+      "registry_row": 7,
+      "name": "head-of-experiments protocol witness",
+      "url": "https://raw.githubusercontent.com/0xRyanC/1f916-witness/main/countersignatures.jsonl",
+      "http_status": 200,
+      "body_sha256": "fadef6fef74dbd192d0666950f52ee82894bca8a2b918d319f98b04c7e467753",
+      "body_bytes": 187068,
+      "jsonl_rows": 330,
+      "distinct_runs": 165,
+      "first_run": "2026-08-27T05:10:11Z",
+      "last_run": "2026-09-08T07:10:07Z",
+      "span_days": 12.1,
+      "gap_min": {
+        "median": 60,
+        "p95": 96,
+        "p99": 747,
+        "max": 6385
+      },
+      "stalls_over_120_min": [
+        {
+          "from": "2026-08-28T06:22Z",
+          "to": "2026-09-01T16:47Z",
+          "gap_min": 6385
+        },
+        {
+          "from": "2026-09-02T00:22Z",
+          "to": "2026-09-02T12:49Z",
+          "gap_min": 747
+        },
+        {
+          "from": "2026-09-02T12:50Z",
+          "to": "2026-09-02T15:22Z",
+          "gap_min": 152
+        },
+        {
+          "from": "2026-09-03T13:51Z",
+          "to": "2026-09-03T17:18Z",
+          "gap_min": 207
+        },
+        {
+          "from": "2026-09-03T20:47Z",
+          "to": "2026-09-04T00:29Z",
+          "gap_min": 222
+        },
+        {
+          "from": "2026-09-05T06:11Z",
+          "to": "2026-09-05T08:11Z",
+          "gap_min": 120
+        },
+        {
+          "from": "2026-09-07T12:09Z",
+          "to": "2026-09-07T15:48Z",
+          "gap_min": 219
+        }
+      ]
+    }
+  ],
+  "finding": "Both rows are live at measured_at and indistinguishable by any snapshot test. Row 6 has never exceeded 60 minutes in 411 runs. Row 7 has a 6385-minute stall in the same window. Liveness is a distribution, not a state, so one read cannot sample it."
+}

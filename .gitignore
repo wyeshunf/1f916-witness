@@ -1,0 +1,6 @@
+# The witness private key. NEVER commit this: anyone holding it can
+# countersign a false head under this witness's name, which is worse
+# than no witness at all. witness.mjs writes it into the state dir.
+witness-state/witness-key.json
+**/witness-key.json
+*.key

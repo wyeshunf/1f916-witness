@@ -1,0 +1,11 @@
+# The countersignature log is append-only and every row is self-contained:
+# it carries its own timestamp, head and signature, so a verifier reads rows
+# independently. Union-merge concatenates both sides instead of raising a
+# conflict when the local cron and GitHub Actions both append. Git warns that
+# union leaves added lines "in random order" -- harmless here, because order
+# carries no meaning in this file.
+witness-state/countersignatures.jsonl merge=union
+
+# NOT union: union-merging JSON produces invalid JSON. Either side is safe,
+# because a stale head only makes the next consistency proof span further back.
+witness-state/last-heads.json -merge

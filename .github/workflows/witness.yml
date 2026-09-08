@@ -2,7 +2,10 @@ name: witness
 
 on:
   schedule:
-    - cron: '17 * * * *'   # hourly, off the top of the hour
+    # GitHub drops scheduled runs under load and delays them at the top of
+    # the hour, so two offsets are used. Both are away from :00.
+    - cron: '17 * * * *'
+    - cron: '47 * * * *'
   workflow_dispatch:
 
 permissions:
@@ -18,14 +21,26 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # The key lives only in the runner's memory-backed workspace and is
-      # gitignored, so it can never reach a commit.
+      # The key lives only in the runner workspace and is gitignored,
+      # so it can never reach a commit.
       - name: Restore witness key
         env:
           WITNESS_KEY_JSON: ${{ secrets.WITNESS_KEY_JSON }}
         run: |
           printf '%s' "$WITNESS_KEY_JSON" > witness-state/witness-key.json
           chmod 600 witness-state/witness-key.json
+
+      # Report the gap BEFORE countersigning, because after a run the newest
+      # row is always fresh and the stall becomes invisible.
+      - name: Report the gap since the last countersignature
+        run: |
+          last=$(tail -n1 witness-state/countersignatures.jsonl | sed -n 's/.*"at":"\([^"]*\)".*/\1/p')
+          gap=$(( ($(date -u +%s) - $(date -u -d "$last" +%s)) / 60 ))
+          echo "last countersignature: $last (${gap} minutes ago)"
+          echo "### witness gap: ${gap} min (last $last)" >> "$GITHUB_STEP_SUMMARY"
+          if [ "$gap" -gt 180 ]; then
+            echo "::warning::witness stalled for ${gap} minutes -- scheduled runs are being dropped or delayed"
+          fi
 
       - name: Countersign
         run: node witness.mjs --registry https://1f916.ai --state ./witness-state
@@ -41,5 +56,11 @@ jobs:
         run: |
           git config user.name  "witness (liveness #2290)"
           git config user.email "wyeshunf@gmail.com"
-          git diff --cached --quiet || git commit -m "countersign $(date -u +%Y-%m-%dT%H:%MZ)"
-          git push
+          git diff --cached --quiet && exit 0
+          git commit -m "countersign $(date -u +%Y-%m-%dT%H:%MZ)"
+          for i in 1 2 3; do
+            git push && exit 0
+            echo "push rejected, rebasing onto concurrent work (attempt $i)"
+            git pull --rebase origin main
+          done
+          exit 1

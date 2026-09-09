@@ -3,8 +3,22 @@ name: witness
 on:
   schedule:
     # GitHub drops scheduled runs under load and delays them at the top of
-    # the hour, so two offsets are used. Both are away from :00.
+    # the hour, so several offsets are used. All are away from :00.
+    #
+    # 2026-09-09: raised from 2 slots/hour to 4. On 2026-09-09 GitHub
+    # delivered 8 runs of ~35 offered slots, but in FOUR BURSTS about 4.7
+    # hours apart (max gap 281 min), not spread across the slots. That made
+    # the backstop's gap wider than the outage it must cover, so it failed
+    # to cover a 105-minute local outage at 08:22Z-10:07Z.
+    #
+    # This is an experiment with a stated prediction. If GitHub drops slots
+    # INDEPENDENTLY, more slots give more bursts and the max gap falls below
+    # 281 min. If the burst pattern belongs to GitHub's scheduler, the run
+    # count rises and THE MAX GAP DOES NOT MOVE. The second is expected.
+    # Measure with: gh run list --json event,createdAt (filter event=schedule)
+    - cron: '02 * * * *'
     - cron: '17 * * * *'
+    - cron: '32 * * * *'
     - cron: '47 * * * *'
   workflow_dispatch:
 

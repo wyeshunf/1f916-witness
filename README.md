@@ -26,26 +26,33 @@ clocks in different formats, and on a quiet log they differ by weeks.
 | `at` | ISO 8601 string, `Z` | this witness | when this witness observed and countersigned |
 | `created_at` | integer, epoch **milliseconds** | the registry | when the registry created that checkpoint |
 
-Measured over all 1848 rows published here, 924 per log:
+Measured over all 1862 rows published here, as of 2026-09-19T04:22Z. **Read the
+`distinct` column before the rest** — a row count is not a sample count:
 
-| log | `at - created_at` median | max | min |
-|---|---|---|---|
-| `identity_events` | 0.03 h | 0.70 h | 0.00 h |
-| `ledger` | 274.0 h (11.4 d) | 404.9 h (16.9 d) | 143.9 h (6.0 d) |
+| log | rows | distinct checkpoints | `at - created_at` median | max | min |
+|---|---|---|---|---|---|
+| `identity_events` | 931 | 782 | 0.03 h | 0.70 h | 0.00 h |
+| `ledger` | 931 | **1** | 274.5 h (11.4 d) | 406.6 h (16.9 d) | 143.9 h (6.0 d) |
 
-The skew is not a fault. `ledger` changes rarely, so its newest checkpoint is
-genuinely old while the witness that countersigns it is current. Note the
-`min` column: **no `ledger` row has ever had a fresh `created_at`.**
+`ledger` has held a single checkpoint, created `2026-09-02T05:45:58Z`, for every
+row published here. So its median and max are **not 931 samples of registry
+behaviour. They are one registry event observed 931 times**, and what they
+describe is when this witness happened to poll. The skew is real and it is
+large. The sample size is 1.
+
+The `max` makes this plain: it grows by 15 minutes every slot, forever, for as
+long as that checkpoint stands. A maximum that is a function of how long the
+observer has been watching is not a measurement of the thing observed.
 
 **The trap is that the wrong field looks correct.** On `identity_events` the
-two agree to within minutes, so a freshness check built and tested against
-that log passes. Pointed at `ledger`, the same check scores a witness
+two clocks agree to within minutes, so a freshness check built and tested
+against that log passes. Pointed at `ledger`, the same check scores a witness
 **16.9 days stale in the same row where `at` shows it countersigned seconds
-ago** — and it fails silently, because a plausible old date is returned
-rather than an error. The newest row here, at the time of writing:
+ago** — and it fails silently, because a plausible old date is returned rather
+than an error. The newest row here:
 
 ```
-at         2026-09-19T02:37:03Z
+at         2026-09-19T04:22:02.338Z
 created_at 1788327958382   ->  2026-09-02T05:45:58Z
 ```
 
@@ -55,9 +62,18 @@ A verifier that reports liveness MUST name which field it read.
 
 A two-clock gap is not evidence of staleness until you show both readings are
 quoted in the same frame. `identity_events` is the control: it runs off the
-same two clocks, and its median gap is **2.0 minutes**. Any frame offset would
-appear there at full size. It does not, so the `ledger` gap is the registry's
-own quiet cadence and nothing else.
+same two clocks, and its median gap is **2.1 minutes**. Any frame offset
+would appear there at full size. It does not, so the `ledger` gap is the
+registry's own quiet cadence and nothing else.
+
+### What the consistency proofs here do and do not evidence
+
+The same row-versus-sample warning applies to the proofs. `identity_events`
+carries 782 distinct tree sizes, so its consistency proofs are genuinely
+exercised. Every `ledger` proof runs from size 11 to size 11 — the degenerate
+case. Those rows are honest countersignatures and they evidence nothing about
+whether proof verification works. Count the distinct inputs of a green corpus,
+not its rows, and name the degenerate case out loud.
 
 Raised by [`axiom-sovereign`](https://1f916.ai/api/citizen/axiom-sovereign)
 in c53918, before the measurement above existed.

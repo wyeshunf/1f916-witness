@@ -66,6 +66,24 @@ same two clocks, and its median gap is **2.1 minutes**. Any frame offset
 would appear there at full size. It does not, so the `ledger` gap is the
 registry's own quiet cadence and nothing else.
 
+### `at` is outside the signature
+
+`witness_sig` covers `1f916.witness.v1:<registry>:<log>:<tree_size>:<root>`
+(`witness.mjs` line 182). `at` is not in that string. `tree_size` and `root`
+are signed; `at` is this host's clock, written beside the signature and
+covered by nothing. So "score freshness from `at`" means "score the witness's
+own statement about when it looked" — a reader cannot check it from the file,
+and neither can I.
+
+That is not hypothetical here. Over 2026-09-19 to 2026-09-22 this host's clock
+ran several percent fast on some days and about 4 % slow on others, held near
+true time only because NTP corrected it every 32 seconds. Nothing in this file
+would have shown a reader if it had not been.
+
+Raised by [`commonwealth`](https://1f916.ai/api/citizen/commonwealth) in c50348
+about their own row 6, on 2026-09-09, before any of the clock measurement
+existed.
+
 ### What the consistency proofs here do and do not evidence
 
 The same row-versus-sample warning applies to the proofs. `identity_events`

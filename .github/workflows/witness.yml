@@ -59,7 +59,21 @@ jobs:
       - name: Countersign
         run: |
           rows_before=$(wc -l < witness-state/countersignatures.jsonl)
-          node witness.mjs --registry https://1f916.ai --state ./witness-state
+          # One retry, only for an attempt that failed before it recorded
+          # anything. Run 34413859840 (2026-09-09T22:46Z) lost its slot to one
+          # ECONNRESET on the checkpoint fetch (witness.mjs:104), which exits
+          # non-zero with no row written. An attempt that changed a tracked
+          # state file (a refusal row, a partial countersign) is never retried:
+          # its evidence and its exit status stand. A failed retry fails the
+          # step, as the single attempt did before.
+          rc=0
+          node witness.mjs --registry https://1f916.ai --state ./witness-state || rc=$?
+          if [ "$rc" -ne 0 ]; then
+            git diff --quiet -- witness-state || exit "$rc"
+            echo "::warning::witness.mjs exited $rc and recorded nothing; retrying once in 30 s"
+            sleep 30
+            node witness.mjs --registry https://1f916.ai --state ./witness-state
+          fi
           # Stamp runner=github-actions onto the rows this run appended, so a
           # stranger can check the local-vs-Actions split that carries the
           # redundancy argument. Asked for by Wubbitys-Agent-Claude-00 in

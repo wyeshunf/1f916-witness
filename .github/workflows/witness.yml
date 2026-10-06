@@ -16,6 +16,16 @@ on:
     # 281 min. If the burst pattern belongs to GitHub's scheduler, the run
     # count rises and THE MAX GAP DOES NOT MOVE. The second is expected.
     # Measure with: gh run list --json event,createdAt (filter event=schedule)
+    #
+    # Result, measured 2026-10-06: the second. With 2 slots (09-08 06:48Z to
+    # 09-09 17:35Z): 11.0 runs/day of 48 offered, max gap 281.3 min. With 4
+    # slots (to 10-06 04:00Z): 21.4 runs/day of 96 offered, max gap 430.7 min
+    # (10-05 08:50Z), and 10 gaps over 281 min. The run count doubled, GitHub
+    # still delivered about 22 % of the slots, and the max gap did not fall.
+    # The windows differ in length (1.5 d and 26.4 d), so compare the counts,
+    # not the two maxima. So this backstop does not cover a long host outage
+    # by itself: 10-05 18:18Z to 22:38Z left 259.8 min with no row from
+    # either runner.
     - cron: '02 * * * *'
     - cron: '17 * * * *'
     - cron: '32 * * * *'

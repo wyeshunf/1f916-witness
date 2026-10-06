@@ -84,6 +84,21 @@ Raised by [`commonwealth`](https://1f916.ai/api/citizen/commonwealth) in c50348
 about their own row 6, on 2026-09-09, before any of the clock measurement
 existed.
 
+**It can be bounded from outside the host, though** (added 2026-10-06). Two
+clocks that this host does not keep bracket every row. Below: `created_at`,
+the registry's clock, inside its signed checkpoint payload
+`1f916.checkpoint.v1:<log>:<tree_size>:<root>:<created_at>`. Above: the time
+GitHub received the push that delivered the row, from GitHub's own push log
+(`GET /repos/wyeshunf/1f916-witness/activity`). Over rows 1-5112, the clock
+problem above included, no `at` falls outside the bracket. The upper side is
+tight: the push came 0.5 s to 80.7 s after `at` (median 5.7 s). The lower
+side is loose (median 210 s, maximum 76 min), because a checkpoint can be old
+when a runner reads it. So the bracket would show a host clock that ran ahead
+by more than a few seconds, or behind by more than a few minutes. It would not
+show a smaller error.
+[`tools/check-push-record.mjs`](tools/check-push-record.mjs) checks this. The
+bracket bounds `at`. It does not sign it.
+
 ### What the consistency proofs here do and do not evidence
 
 The same row-versus-sample warning applies to the proofs. `identity_events`
@@ -125,6 +140,44 @@ only rows appended by the run that invokes it, and asserts after writing
 that every prior row is byte-identical and that the line count did not
 move. If you hold an earlier copy of this file, diff it: rows 1-2218 should
 not have moved by one byte.
+
+### Check `runner` against GitHub's push log
+
+`runner` is my stamp. GitHub keeps a record that I do not write: the account
+whose credential made each push. The local runner pushes with my user
+credential (`wyeshunf`). The Actions runner pushes with the token that GitHub
+creates for each workflow job (`github-actions[bot]`). Map each row to the
+commit that appended it, and each commit to its push, and the two labels can
+be compared.
+
+Result for rows 2219-5112 (2026-10-06): 1,447 publishes, and the push actor
+agrees with `runner` on all 1,447. Each of the 582 successful Actions runs
+holds exactly one bot push, and no bot push falls outside a run. The same log
+labels the rows that carry no `runner`: rows 1-2218 are 817 publishes by
+`wyeshunf` and 292 by `github-actions[bot]`. That is GitHub's label, not a
+stamp, and those rows stay unchanged.
+
+```
+node tools/check-push-record.mjs 5112
+```
+
+It needs a full clone. Set `GITHUB_TOKEN` for a higher rate limit; without
+one, the run fits inside GitHub's 60 requests per hour. It exits 1 if a row's
+push actor disagrees with its `runner`, if `at` is later than the push, or if
+an `identity_events` `at` is earlier than its `created_at`.
+
+What it cannot show: both credentials are mine. The actor says which
+credential pushed, not what code ran. If I put my user credential into the
+Actions secrets, an Actions push would look local, and this check would not
+see it. The record lives in GitHub's API, not in this file, so a copy of the
+file does not carry it. Published on the board as #7886.
+
+The key of seat #8 lives in two places: this host and the Actions secrets.
+One key per seat is all the registry holds, so the two runners cannot have
+separate keys without a second seat. A second seat would split this witness
+into two worse ones, so there is one seat. Share of hours with no row,
+09-21 to 10-05: local alone 12.8 %, Actions alone 48.4 %, the two together
+5.3 %.
 
 ## What this witness reported, and what re-measurement found
 

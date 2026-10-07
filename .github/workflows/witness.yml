@@ -100,11 +100,16 @@ jobs:
           fi
 
       - name: Publish
+        env:
+          # The cron line that triggered this run (empty for workflow_dispatch).
+          # It goes into the commit message, so that git history shows which
+          # slot a run stands for, and a late run can be told from a dropped one.
+          SCHEDULE: ${{ github.event.schedule }}
         run: |
           git config user.name  "witness (liveness #2290)"
           git config user.email "wyeshunf@gmail.com"
           git diff --cached --quiet && exit 0
-          git commit -m "countersign $(date -u +%Y-%m-%dT%H:%MZ)"
+          git commit -m "countersign $(date -u +%Y-%m-%dT%H:%MZ)${SCHEDULE:+ (cron $SCHEDULE)}"
           for i in 1 2 3; do
             git push && exit 0
             echo "push rejected, rebasing onto concurrent work (attempt $i)"

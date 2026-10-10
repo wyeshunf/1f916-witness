@@ -80,7 +80,19 @@ for (const line of git("log", "--reverse", "--format=C %H", "--numstat", "--", F
 }
 
 // 2. Commit -> the push that delivered it (GitHub's time and actor).
-const activity = await pages(`https://api.github.com/repos/${SLUG}/activity?per_page=100`);
+// GitHub can record one ref update twice, under two ids, with the same
+// timestamp. By 2026-10-10 it had done so 4 times: 3 local pushes and the
+// Actions run 37644231519, whose log shows one "main -> main" line for
+// aec08ca..c1949df. Count each (before, after) pair once, and report how
+// many records were extra.
+const seen = new Set();
+let duplicates = 0;
+const activity = (await pages(`https://api.github.com/repos/${SLUG}/activity?per_page=100`)).filter((a) => {
+  const key = `${a.ref} ${a.before} ${a.after}`;
+  if (seen.has(key)) { duplicates++; return false; }
+  seen.add(key);
+  return true;
+});
 const push = new Map();
 const kinds = {};
 let notLocal = 0;
@@ -107,7 +119,7 @@ rows.forEach((r, i) => {
 });
 
 const fail = [];
-const res = { rows_checked: Math.min(rows.length, lastRow), deleted_lines: deletedLines, pushes: kinds, pushes_not_in_clone: notLocal,
+const res = { rows_checked: Math.min(rows.length, lastRow), deleted_lines: deletedLines, pushes: kinds, duplicate_push_records: duplicates, pushes_not_in_clone: notLocal,
   stamped_publishes: 0, actor_agrees: 0, unstamped_publishes_by_actor: {}, not_pushed_yet: 0, lag_s: null, checkpoint_lead_s: null };
 const lag = [], lead = [];
 for (const [c, p] of pubs) {

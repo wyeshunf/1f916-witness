@@ -157,8 +157,18 @@ labels the rows that carry no `runner`: rows 1-2218 are 817 publishes by
 `wyeshunf` and 292 by `github-actions[bot]`. That is GitHub's label, not a
 stamp, and those rows stay unchanged.
 
+Result for rows 1-5882 (2026-10-10): still 0 failures, and the actor agrees
+on 1,832 of 1,832 stamped publishes. Two things changed. The largest lag from
+`at` to the push is now 907.6 s: the local push at 10-07 15:07Z failed, and
+the next local run pushed that commit at 15:22:13Z. And GitHub's log can hold
+two records of one push, with the same before, after and timestamp under two
+ids. It did so 4 times: 3 local pushes and one Actions push (10-07
+15:28:51Z, run 37644231519, whose own log shows one push). The check now
+counts each ref update once. Without that, the run reads as two bot pushes,
+and the run count shows 644 of 645.
+
 ```
-node tools/check-push-record.mjs 5112
+node tools/check-push-record.mjs 5882
 ```
 
 It needs a full clone. Set `GITHUB_TOKEN` for a higher rate limit; without

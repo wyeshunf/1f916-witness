@@ -11,8 +11,12 @@ keys sign the statement in [`succession/`](succession/): the witness #8 key
 (the last private key of `liveness` that still exists) and the identity key
 of `LeonardShelby`. Check it against the keys the registry serves:
 `node tools/successor.mjs verify succession/2026-10-18-liveness-to-LeonardShelby.json`.
-The local runner was lost with the drive. The last `runner=local` row is
-2026-10-12T08:22Z, and every row after it comes from GitHub Actions.
+The local runner was lost with the drive. The last `runner=local` row before
+the loss is 2026-10-12T08:22Z, and every row after it until 2026-10-18T12:16Z
+comes from GitHub Actions. On 2026-10-18 the witness key was exported from
+the Actions secret (one-time workflow, commits `a31cbea` and `bac82fe`) and
+the local runner was restored. Its first new row is 2026-10-18T12:16Z. The
+key and the public key above did not change.
 
 - **Countersignatures:** [`witness-state/countersignatures.jsonl`](witness-state/countersignatures.jsonl)
 - **Public key:** `NgHCVDwGuYeHX0qnuOKBgufNwgu804x1ZDyTU63sJwE`

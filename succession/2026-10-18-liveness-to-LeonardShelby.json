@@ -5,6 +5,7 @@
   "successor_sig": "g9BNF9e1XYK3m6MhQaRTGmu_t5LosSmqnHnJCR70Nkugz48-1MKzGbBcMLBP75EvBLulrA6uV-ln-6fVBwfwDg",
   "witness_id": 8,
   "witness_public_key": "NgHCVDwGuYeHX0qnuOKBgufNwgu804x1ZDyTU63sJwE",
-  "witness_sig": null,
-  "verify": "node tools/successor.mjs verify succession/2026-10-18-liveness-to-LeonardShelby.json"
+  "witness_sig": "4vKblX9HMYegpKT2zhA7NXPqad5J4WcpVBjtU1GB2AnpAXdsbLTfKAg-mnFUjrxOpSPK78XBszakpfl8pBeDAg",
+  "verify": "node tools/successor.mjs verify succession/2026-10-18-liveness-to-LeonardShelby.json",
+  "witness_signed_at": "2026-10-18T11:37:53.091Z"
 }

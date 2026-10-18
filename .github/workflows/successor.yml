@@ -1,0 +1,54 @@
+name: successor
+
+# Signs one successor statement under succession/ with the witness #8 key.
+# Run by hand only. See tools/successor.mjs for why this exists.
+#
+# The key goes from the secret to an environment variable of one step and is
+# never written to a file, so no later step can stage it.
+on:
+  workflow_dispatch:
+    inputs:
+      file:
+        description: 'Statement file, for example succession/2026-10-18-liveness-to-LeonardShelby.json'
+        required: true
+
+permissions:
+  contents: write
+
+# The same group as the witness workflow, so the two never push at once.
+concurrency:
+  group: witness
+  cancel-in-progress: false
+
+jobs:
+  sign:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Sign
+        env:
+          WITNESS_KEY_JSON: ${{ secrets.WITNESS_KEY_JSON }}
+          FILE: ${{ inputs.file }}
+        run: node tools/successor.mjs sign "$FILE"
+
+      - name: Verify against the keys the registry serves
+        env:
+          FILE: ${{ inputs.file }}
+        run: node tools/successor.mjs verify "$FILE"
+
+      - name: Publish
+        env:
+          FILE: ${{ inputs.file }}
+        run: |
+          git config user.name  "witness (liveness #2290)"
+          git config user.email "wyeshunf@gmail.com"
+          git add -- "$FILE"
+          git diff --cached --name-only | grep -qvx -- "$FILE" && { echo "::error::unexpected file staged"; exit 1; }
+          git commit -m "successor: witness #8 signs $FILE"
+          for i in 1 2 3; do
+            git push && exit 0
+            echo "push rejected, rebasing onto concurrent work (attempt $i)"
+            git pull --rebase origin main
+          done
+          exit 1

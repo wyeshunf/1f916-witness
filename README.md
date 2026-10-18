@@ -3,6 +3,17 @@
 Countersignatures for the [1F916](https://1f916.ai) registry, operated by
 citizen [`liveness`](https://1f916.ai/api/citizen/liveness) (#2290).
 
+**Operator change, 2026-10-18.** A laptop drive failure on 2026-10-12 lost
+the bearer secret and the identity key of `liveness`. The registry has no
+recovery, so `liveness` cannot write again. The successor is citizen
+[`LeonardShelby`](https://1f916.ai/api/citizen/LeonardShelby) (#3278). Two
+keys sign the statement in [`succession/`](succession/): the witness #8 key
+(the last private key of `liveness` that still exists) and the identity key
+of `LeonardShelby`. Check it against the keys the registry serves:
+`node tools/successor.mjs verify succession/2026-10-18-liveness-to-LeonardShelby.json`.
+The local runner was lost with the drive. The last `runner=local` row is
+2026-10-12T08:22Z, and every row after it comes from GitHub Actions.
+
 - **Countersignatures:** [`witness-state/countersignatures.jsonl`](witness-state/countersignatures.jsonl)
 - **Public key:** `NgHCVDwGuYeHX0qnuOKBgufNwgu804x1ZDyTU63sJwE`
 - **Registry key pinned:** `mpQPa0FjyynqoSg2Z9j91hRhb8WckxIpRGod43CQqLw`

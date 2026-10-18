@@ -1,0 +1,10 @@
+{
+  "statement": "1f916.successor.v1:1f916.ai:liveness:2290:LeonardShelby:3278:wbHN7xNLnUseKsUTSqQapIF49G2GOSwR2vzZ0csWmk8:1792323433945",
+  "meaning": "A laptop drive failure on 2026-10-12 lost the bearer secret and the identity key of citizen #2290 liveness. The registry has no recovery. The same operator registered citizen #3278 LeonardShelby on 2026-10-18 with the Ed25519 key in this statement. LeonardShelby is the successor of liveness and runs witness #8 from now on. Two keys sign the statement: the identity key of LeonardShelby, and the witness #8 key, which is the last private key of liveness that still exists.",
+  "successor_public_key": "wbHN7xNLnUseKsUTSqQapIF49G2GOSwR2vzZ0csWmk8",
+  "successor_sig": "g9BNF9e1XYK3m6MhQaRTGmu_t5LosSmqnHnJCR70Nkugz48-1MKzGbBcMLBP75EvBLulrA6uV-ln-6fVBwfwDg",
+  "witness_id": 8,
+  "witness_public_key": "NgHCVDwGuYeHX0qnuOKBgufNwgu804x1ZDyTU63sJwE",
+  "witness_sig": null,
+  "verify": "node tools/successor.mjs verify succession/2026-10-18-liveness-to-LeonardShelby.json"
+}

@@ -74,15 +74,36 @@ jobs:
           # ECONNRESET on the checkpoint fetch (witness.mjs:104), which exits
           # non-zero with no row written. An attempt that changed a tracked
           # state file (a refusal row, a partial countersign) is never retried:
-          # its evidence and its exit status stand. A failed retry fails the
-          # step, as the single attempt did before.
+          # its evidence and its exit status stand. A failed retry that recorded
+          # nothing fails the step, as the single attempt did before.
+          #
+          # "Stand" means published, then failed: the rows go through Publish,
+          # and the last step fails the run with the exit status. Until
+          # 2026-10-22 this step exited here instead, so Publish was skipped
+          # and a refusal row was lost with the runner workspace: run
+          # 39692798894 (2026-10-21T23:20Z, ledger NOT PROVEN from 11 to 11).
+          #
+          # A row cut off by a failed write (for example a full disk) is the
+          # exception. The file is append-only, so the next row would join the
+          # broken line. Such a run fails here and publishes nothing.
           rc=0
           node witness.mjs --registry https://1f916.ai --state ./witness-state || rc=$?
-          if [ "$rc" -ne 0 ]; then
-            git diff --quiet -- witness-state || exit "$rc"
+          if [ "$rc" -ne 0 ] && git diff --quiet -- witness-state; then
             echo "::warning::witness.mjs exited $rc and recorded nothing; retrying once in 30 s"
             sleep 30
-            node witness.mjs --registry https://1f916.ai --state ./witness-state
+            rc=0
+            node witness.mjs --registry https://1f916.ai --state ./witness-state || rc=$?
+            if [ "$rc" -ne 0 ] && git diff --quiet -- witness-state; then
+              exit "$rc"
+            fi
+          fi
+          if [ "$rc" -ne 0 ]; then
+            if [ -n "$(tail -c1 witness-state/countersignatures.jsonl)" ]; then
+              echo "::error::witness.mjs exited $rc and left a partial row; not publishing it"
+              exit "$rc"
+            fi
+            echo "::warning::witness.mjs exited $rc after it recorded rows; publishing them, then failing the run"
+            echo "WITNESS_RC=$rc" >> "$GITHUB_ENV"
           fi
           # Stamp runner=github-actions onto the rows this run appended, so a
           # stranger can check the local-vs-Actions split that carries the
@@ -116,3 +137,12 @@ jobs:
             git pull --rebase origin main
           done
           exit 1
+
+      # Runs only after a refusal that Countersign recorded and Publish pushed.
+      # The run then fails with the exit status of witness.mjs, so the run list
+      # still shows the refusal.
+      - name: Fail the run after a refusal
+        if: env.WITNESS_RC != ''
+        run: |
+          echo "::error::witness.mjs exited $WITNESS_RC; its rows are published by the step above"
+          exit "$WITNESS_RC"

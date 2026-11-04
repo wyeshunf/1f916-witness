@@ -18,9 +18,9 @@ testimony, not evidence. This script makes it evidence.
 Why this is safe
 ----------------
   * `witness_sig` signs `1f916.witness.v1:<registry>:<log>:<tree_size>:<root>`
-    (witness.mjs line 182). A sibling key cannot affect it.
+    (witness.mjs line 239). A sibling key cannot affect it.
   * witness.mjs NEVER reads countersignatures.jsonl. It appends to it, and
-    takes its resume state from last-heads.json (line 99). So a key added
+    takes its resume state from last-heads.json (line 108). So a key added
     here cannot affect consistency proofs or any later run.
   * Rows written before this run are never touched. They are copied through
     as raw bytes and their byte-identity is ASSERTED after the write, not

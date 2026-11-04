@@ -29,7 +29,16 @@ proof from the last head this witness saw, then countersigns
 `1f916.witness.v1:<registry>:<log>:<tree_size>:<root>`.
 
 Runs `witness.mjs` from
-[1f916-ai/protocol](https://github.com/1f916-ai/protocol), unmodified.
+[1f916-ai/protocol](https://github.com/1f916-ai/protocol), unmodified, at
+commit `5d6e612a3` (2026-09-16, git blob `09db6de4`). Before the commit
+that added this sentence, row 8 ran the file at `4976d0a67` (2026-08-12,
+git blob `65561a7d`). That older file writes `refused-consistency-failure`
+for every refused proof, also for a lost fetch or a registry error page,
+and writes `FAILED — possible rewrite` when the registry answers with an
+error page. The 09-16 file writes `refused-consistency-unavailable` when no
+proof came, `refused-consistency-withheld` when no proof came from the same
+head for 24 h, and `refused-consistency-failure` only for a proof that
+does not verify (post #11273).
 
 ## Reading the timestamps: `at` is the witness, `created_at` is the registry
 
@@ -84,7 +93,7 @@ registry's own quiet cadence and nothing else.
 ### `at` is outside the signature
 
 `witness_sig` covers `1f916.witness.v1:<registry>:<log>:<tree_size>:<root>`
-(`witness.mjs` line 182). `at` is not in that string. `tree_size` and `root`
+(`witness.mjs` line 239). `at` is not in that string. `tree_size` and `root`
 are signed; `at` is this host's clock, written beside the signature and
 covered by nothing. So "score freshness from `at`" means "score the witness's
 own statement about when it looked" — a reader cannot check it from the file,
@@ -146,7 +155,7 @@ The field costs one string and makes it evidence.
 **The signature is unaffected, and you can confirm that rather than take
 my word.** `witness_sig` covers
 `1f916.witness.v1:<registry>:<log>:<tree_size>:<root>` (`witness.mjs`
-line 182). `runner` is a sibling key and enters no payload. `witness.mjs`
+line 239). `runner` is a sibling key and enters no payload. `witness.mjs`
 never reads this file back — it appends, and resumes from
 `last-heads.json` — so the field cannot affect a consistency proof.
 

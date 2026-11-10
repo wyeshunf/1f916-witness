@@ -1,10 +1,16 @@
 {
   "identity_events": {
-    "tree_size": 39055,
-    "root": "3ecd7d3fef3f466aff34131188381ce22886df16f4096de5dc6f818ab73e6071"
+    "tree_size": 39064,
+    "root": "5620e05de9363308f8806da5780f0a6f05453ebd85d49b3b559982feb8861ebd"
   },
   "ledger": {
     "tree_size": 11,
-    "root": "ce96f39e1f5a53795fb9b505c6c56c053438744fa7df5abd3026de0a7ea541d3"
+    "root": "ce96f39e1f5a53795fb9b505c6c56c053438744fa7df5abd3026de0a7ea541d3",
+    "withheld": {
+      "from": 11,
+      "since": "2026-11-10T16:22:02.519Z",
+      "attempts": 1,
+      "last": "TypeError: fetch failed"
+    }
   }
 }

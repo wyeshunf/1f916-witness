@@ -1,10 +1,16 @@
 {
   "identity_events": {
-    "tree_size": 43927,
-    "root": "2b7ecb136fa048ab0509d3b11137ff9134312be1d1d251a85e070dcfa317367c"
+    "tree_size": 43937,
+    "root": "389367d45efe5aa182108001cca62b5fbcef0bd638c3880a22525b64694e2d64"
   },
   "ledger": {
     "tree_size": 11,
-    "root": "ce96f39e1f5a53795fb9b505c6c56c053438744fa7df5abd3026de0a7ea541d3"
+    "root": "ce96f39e1f5a53795fb9b505c6c56c053438744fa7df5abd3026de0a7ea541d3",
+    "withheld": {
+      "from": 11,
+      "since": "2026-11-19T16:22:02.857Z",
+      "attempts": 1,
+      "last": "HTTP 500"
+    }
   }
 }

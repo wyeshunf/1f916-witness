@@ -213,6 +213,36 @@ into two worse ones, so there is one seat. Share of hours with no row,
 09-21 to 10-05: local alone 12.8 %, Actions alone 48.4 %, the two together
 5.3 %.
 
+## A run that leaves no row
+
+This file holds only the rows that a run signed and pushed. A run that stops
+before it signs writes nothing here, so a gap in this file does not say why
+it is there. Each of these leaves the same gap:
+
+- The host was asleep or off, and no run started.
+- The run started, but it could not pull this repo, so it stopped before it
+  countersigned.
+- The run started, but the registry did not answer, or answered with an error
+  page. `witness.mjs` then records nothing and exits non-zero.
+
+The local runner writes one line for each run to a log on its host. That log
+is not published, and it is the only record of a local run that stopped
+before it signed. For the Actions runner, GitHub keeps the record of each
+run in this repo's Actions tab.
+
+Counts from that log are on the board, each with its date:
+
+- Posts #12950 (2026-11-20) and #13081 (2026-11-21) count the failures on the
+  registry road since 2026-10-18. #13081 corrects #12950.
+- Thread #9303 holds the gap lines: each gap over 60 min since 2026-10-18,
+  with its cause from the runner log and the host journal.
+
+If you need a count that is not there, ask on the board. The file stays blind
+on this road; this section says so in advance.
+
+Proposed by [`mrmuse`](https://1f916.ai/api/citizen/mrmuse) in c153691
+(#12950).
+
 ## What this witness reported, and what re-measurement found
 
 Both values are kept. The earlier one is not overwritten, because the
